@@ -1,0 +1,70 @@
+#cloud-config
+
+users:
+  - name: "gmorini"
+    passwd: "$1$Dn/815iV$alMQwle5LT4yAsYn/vsAe."
+    groups:
+      - "sudo"
+      - "docker"
+    ssh-authorized-keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3tlDaR7OUnYtSY0znXVKdkvubQWvHKHqavIhLK1wm9r1cm53lNRrEG4JALJ5gGfJqAwztY8NIOXi03gaIPkl/8GTsBxNEiJI+K6fG34RyIUmy36B9/O1ny2KkNpw+KQ2jX2zPwKBtNTTdiVxFCFTJa5AnaIDvMByKCbw2ULbcyLeXALYHYybf2caFreI0uhwXxj3BKuXfZD1eHufsln8+ZqSgUM14vebpZv86yi0xJq41hjj0hUklHk3jwbFgYtql7fQzFFJnGi8nRRl4dxrsQZarhGYijsNbTHjEK1KJtI1DPFqpzuhYE+iYfXn0xjCtMuiVWwRngR6Ug86ATTDb OpenShift-Key"
+
+write_files:
+    - path: "/etc/swarm-join.start"
+      permissions: "0755"
+      owner: "root"
+      content: |
+         #!/usr/bin/bash
+         printf -v NO_PROXY '%s,' 192.168.7.{1..255};
+         export NO_PROXY="${NO_PROXY%,}";
+         IP=`ip a | grep inet | grep  enp.s0 | awk '{print $2}' | awk -F'/' '{print $1}' | uniq`
+         /usr/bin/docker -H=tcp://$IP:2375 run -d --name swarm-join -e "HTTP_PROXY=http://173.38.209.13:80/" -e "HTTPS_PROXY=http://173.38.209.13:80/" -e "NO_PROXY=$NO_PROXY" swarm join   --addr=$IP:2375 token://625aef3a4384e5cf51793d8c57d28657
+
+    - path: "/etc/swarm-join.stop"
+      permissions: "0755"
+      owner: "root"
+      content: |
+         #!/usr/bin/bash
+         /usr/bin/docker rm swarm-join 
+
+coreos:
+  units:
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        BindIPv6Only=both
+        Service=docker.service
+
+        [Install]
+        WantedBy=sockets.target
+
+
+  units:
+    - name: docker.service
+      drop-ins:
+        - name: 20-http-proxy.conf
+          content: |
+            [Service]
+            Environment="HTTP_PROXY=http://173.38.209.13:80/" "HTTPS_PROXY=http://173.38.209.13:80/" "NO_PROXY=192.168.7.*"
+      command: restart
+
+    - name: "swarm-join.service"
+      command: "start"
+      content: |
+        [Unit]
+        Description=Swarm join container
+        Author=Guillaume Morini
+        After=docker.service
+        [Service]
+        TimeoutStartSec=0
+        KillMode=none
+        ExecStart=/etc/swarm-join.start
+        ExecStop=/etc/swarm-join.stop
+        RemainAfterExit=yes
+
