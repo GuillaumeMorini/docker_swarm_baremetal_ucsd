@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+/usr/bin/docker stop swarm-join swarm-manage shipyard-rethinkdb shipyard-discovery shipyard-controller
+/usr/bin/docker rm swarm-join swarm-manage shipyard-rethinkdb shipyard-discovery shipyard-controller
+
+

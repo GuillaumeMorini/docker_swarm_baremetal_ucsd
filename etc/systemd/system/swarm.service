@@ -1,0 +1,11 @@
+[Unit]
+Description=All Swarm containers
+Author=Guillaume Morini
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+ExecStart=/etc/swarm.start
+ExecStop=/etc/swarm.stop
+RemainAfterExit=yes
