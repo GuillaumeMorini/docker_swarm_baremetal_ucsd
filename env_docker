@@ -1,0 +1,2 @@
+#!/bin/bash
+export DOCKER_HOST="tcp://10.60.7.20:5000"
