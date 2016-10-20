@@ -1,10 +1,10 @@
 [Unit]
-Description=Swarm controlers containers
+Description=Swarm join container
 Author=Guillaume Morini
 After=docker.service
 [Service]
 TimeoutStartSec=0
 KillMode=none
-ExecStart=/etc/swarm.start
-ExecStop=/etc/swarm.stop
+ExecStart=/etc/swarm-join.start
+ExecStop=/etc/swarm-join.stop
 RemainAfterExit=yes

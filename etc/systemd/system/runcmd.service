@@ -1,0 +1,6 @@
+[Unit]
+Description=Notify Cisco UCS Director
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/wget http://$PXE_WEBSERVER/$PXEID/notify.html

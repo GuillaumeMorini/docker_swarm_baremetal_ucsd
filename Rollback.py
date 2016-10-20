@@ -24,17 +24,7 @@ def UCSD_REST_API(opName,opData):
     j = json.loads(content)
     return j
 
-## Find the last not rollbacked SR with comment including sys.argv[1]
-result = UCSD_REST_API('userAPIGetTabularReport','{param0:"6",param1:"",param2:"SERVICE-REQUESTS-T10"}')
-srList = [item['Service_Request_Id'] for item in result['serviceResult']['rows']
-	if comment in item['Initiator_Comments'] and "Rollback" not in item['Catalog_Workflow_Name'] and "Rollback" not in item['Rollback_Type']]
-
-if len(srList) == 0:
-	print "No SR with this comment and not already rollbacked found, aborting!"
-	sys.exit()
-
-srList.sort()
-sr = str(srList[-1])
+sr = sys.argv[1]
 
 ## Rollbacking this SR
 result = UCSD_REST_API('userAPIRollbackWorkflow','{param0:"'+sr+'"}')

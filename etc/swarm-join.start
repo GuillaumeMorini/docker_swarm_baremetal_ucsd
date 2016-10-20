@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+printf -v NO_PROXY '%s,' 192.168.7.{1..255};
+export NO_PROXY="${NO_PROXY%,}";
+IP=`ip a | grep inet | grep  enp.s0 | awk '{print $2}' | awk -F'/' '{print $1}' | uniq`
+/usr/bin/docker -H=tcp://$IP:2375 run -d --name swarm-join -e "HTTP_PROXY=http://173.38.209.13:80/" -e "HTTPS_PROXY=http://173.38.209.13:80/" -e "NO_PROXY=$NO_PROXY" swarm join   --addr=$IP:2375 etcd://192.168.7.216:2379

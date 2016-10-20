@@ -10,8 +10,10 @@ protocol = "http"
 host = "10.60.7.72"
 key = {'X-Cloupia-Request-Key': 'AA7EC480A80744FA97DCF1B205E45817'}
 timeout = 360
-workflowName = "Add Docker host"
-workflowInputs = '{"name":"Hostname","value":"'+sys.argv[1]+'"}'
+#workflowName = "Add Docker host"
+#workflowInputs = '{"name":"Hostname","value":"'+sys.argv[1]+'"}'
+workflowName = "Add host to Docker Swarm"
+workflowInputs = ''
 
 def UCSD_REST_API(opName,opData):
     http = httplib2.Http()
@@ -26,7 +28,8 @@ def UCSD_REST_API(opName,opData):
     return j
 
 ## Execute a workflow
-result = UCSD_REST_API('userAPISubmitWorkflowServiceRequest', '{param0:"'+workflowName+'",param1:{"list":['+workflowInputs+']},param2:-1}')
+#result = UCSD_REST_API('userAPISubmitWorkflowServiceRequest', '{param0:"'+workflowName+'",param1:{"list":['+workflowInputs+']},param2:-1}')
+result = UCSD_REST_API('userAPISubmitWorkflowServiceRequest', '{param0:"'+workflowName+'",param1:{}, param2:-1}')
 serviceRequest = str(result['serviceResult'])
 print "SR "+serviceRequest+" has been created for workflow "+workflowName+", please wait for completion..."
 

@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-
 printf -v NO_PROXY '%s,' 192.168.7.{1..255};
 export NO_PROXY="${NO_PROXY%,}";
 export IP=`ip a | grep inet | grep  enp.s0 | awk '{print $2}' | awk -F'/' '{print $1}' | uniq`
@@ -9,17 +8,17 @@ docker run \
     --restart=always \
     --name shipyard-rethinkdb \
     rethinkdb
-docker run \
-    -ti \
-    -d \
-    -p 4001:4001 \
-    -p 7001:7001 \
-    --restart=always \
-    --name shipyard-discovery \
-    microbox/etcd -name discovery
+#docker run \
+#    -ti \
+#    -d \
+#    -p 2379:2379 \
+#    -p 7001:7001 \
+#    --restart=always \
+#    --name shipyard-discovery \
+#    microbox/etcd -name discovery
 # swarm token://625aef3a4384e5cf51793d8c57d28657
-docker -H tcp://$IP:2375 run -ti -d --restart=always --name swarm-manage -e "HTTP_PROXY=http://173.38.209.13:80/" -e "HTTPS_PROXY=http://173.38.209.13:80/" -e "NO_PROXY=$NO_PROXY" -p 5000:2375 swarm manage etcd://$IP:4001
-docker -H=tcp://$IP:2375 run -ti -d --restart=always --name swarm-join -e "HTTP_PROXY=http://173.38.209.13:80/" -e "HTTPS_PROXY=http://173.38.209.13:80/" -e "NO_PROXY=$NO_PROXY" swarm join   --addr=$IP:2375 etcd://$IP:4001
+docker -H tcp://$IP:2375 run -ti -d --restart=always --name swarm-manage -e "HTTP_PROXY=http://173.38.209.13:80/" -e "HTTPS_PROXY=http://173.38.209.13:80/" -e "NO_PROXY=$NO_PROXY" -p 5000:2375 swarm manage etcd://$IP:2379
+docker -H=tcp://$IP:2375 run -ti -d --restart=always --name swarm-join -e "HTTP_PROXY=http://173.38.209.13:80/" -e "HTTPS_PROXY=http://173.38.209.13:80/" -e "NO_PROXY=$NO_PROXY" swarm join   --addr=$IP:2375 etcd://$IP:2379
 docker run \
      -ti \
      -d \
@@ -31,3 +30,5 @@ docker run \
      shipyard/shipyard:latest \
      server \
      -d tcp://$IP:5000
+docker run -d -p 8000:8080 nikfoundas/etcd-viewer
+
